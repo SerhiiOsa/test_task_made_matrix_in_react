@@ -42,18 +42,45 @@ function App() {
     if (closestCache.current[index]) {
       return closestCache.current[index];
     }
-    const diffs = [];
-    randomNumbers.forEach((n, idx) => {
-      if (idx === index) {
-        return;
-      }
-      diffs.push({ idx, diff: Math.abs(n - number) });
-    });
 
-    diffs.sort((a, b) => a.diff - b.diff);
+    let closest;
+    //for smaller quantity of neighboring cells
+    if (neighboringCells / (rows * cols) < 0.1) {
+      const best = [];
+      randomNumbers.forEach((n, idx) => {
+        if (idx === index) {
+          return;
+        }
 
-    const closest = diffs.slice(0, neighboringCells).map((item) => item.idx);
-    closestCache.current[index] = closest;
+        const diff = Math.abs(n - number);
+
+        if (best.length < neighboringCells) {
+          best.push({ idx, diff });
+
+          best.sort((a, b) => a.diff - b.diff);
+        } else if (diff < best[best.length - 1].diff) {
+          best[best.length - 1] = { idx, diff };
+          best.sort((a, b) => a.diff - b.diff);
+        }
+      });
+
+      closest = best.map((item) => item.idx);
+      closestCache.current[index] = closest;
+      //for bigger quantity of neighboring cells
+    } else {
+      const diffs = [];
+      randomNumbers.forEach((n, idx) => {
+        if (idx === index) {
+          return;
+        }
+        diffs.push({ idx, diff: Math.abs(n - number) });
+      });
+
+      diffs.sort((a, b) => a.diff - b.diff);
+
+      closest = diffs.slice(0, neighboringCells).map((item) => item.idx);
+      closestCache.current[index] = closest;
+    }
 
     return closest;
   }, [hoveredNumber, randomNumbers, neighboringCells]);
