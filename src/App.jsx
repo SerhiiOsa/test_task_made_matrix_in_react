@@ -15,19 +15,28 @@ function App() {
     );
   }, [rows, cols]);
 
-  const handleMouseEnter = (cellNumber, cellIndex) => {
-    setHoveredNumber({ number: cellNumber, index: cellIndex });
+  const handleMouseOver = (e) => {
+    const cell = e.target.closest('.cell');
+
+    if (!cell) return;
+    setHoveredNumber({
+      number: Number(cell.dataset.number),
+      index: Number(cell.dataset.index),
+    });
   };
 
-  const handleMouseLeave = () => {
+  const handleMouseOut = () => {
     setHoveredNumber(null);
   };
 
   const getClosestIndices = (num) => {
-    const diffs = randomNumbers.map((n, idx) => ({
-      idx,
-      diff: Math.abs(n - num),
-    }));
+    const diffs = [];
+    randomNumbers.forEach((n, idx) => {
+      if (idx === hoveredNumber.index) {
+        return;
+      }
+      diffs.push({ idx, diff: Math.abs(n - num) });
+    });
 
     diffs.sort((a, b) => a.diff - b.diff);
 
@@ -68,12 +77,19 @@ function App() {
           />
         </div>
       </div>
-      <div className="matrix" style={{ '--cols': cols }}>
+      <div
+        className="matrix"
+        style={{ '--cols': cols }}
+        onMouseOver={(e) => handleMouseOver(e)}
+        onMouseOut={(e) => handleMouseOut(e)}
+      >
         {randomNumbers.map((cellNumber, cellIndex) => {
           const isActive = hoveredNumber?.index === cellIndex;
           const isNeighbor = closestIndices.includes(cellIndex);
           return (
             <div
+              data-number={cellNumber}
+              data-index={cellIndex}
               key={cellIndex}
               className="cell"
               style={{
@@ -83,8 +99,6 @@ function App() {
                   ? 'lightgreen'
                   : '',
               }}
-              onMouseEnter={() => handleMouseEnter(cellNumber, cellIndex)}
-              onMouseLeave={handleMouseLeave}
             >
               {cellNumber}
             </div>
