@@ -5,7 +5,6 @@ function App() {
   const [cols, setCols] = useState(25);
   const [neighboringCells, setNeighboringCells] = useState(10);
   const [randomNumbers, setRandomNumbers] = useState([]);
-  const [cellStyle, setCellStyle] = useState({});
   const [hoveredNumber, setHoveredNumber] = useState(null);
 
   useEffect(() => {
@@ -14,21 +13,13 @@ function App() {
         return Math.floor(Math.random() * 100 + 1);
       })
     );
-
-    setCellStyle({
-      aspectRatio: '1 / 1',
-      flex: `0 0 ${100 / cols}%`,
-      fontSize: `${3000 / cols}%`,
-    });
   }, [rows, cols]);
 
-  const handleMouseEnter = (e, cellNumber, cellIndex) => {
-    e.currentTarget.style.background = `linear-gradient(to right, green ${cellNumber}%, transparent ${cellNumber}%)`;
+  const handleMouseEnter = (cellNumber, cellIndex) => {
     setHoveredNumber({ number: cellNumber, index: cellIndex });
   };
 
-  const handleMouseLeave = (e) => {
-    e.currentTarget.style.background = '';
+  const handleMouseLeave = () => {
     setHoveredNumber(null);
   };
 
@@ -77,7 +68,7 @@ function App() {
           />
         </div>
       </div>
-      <div className="matrix">
+      <div className="matrix" style={{ '--cols': cols }}>
         {randomNumbers.map((cellNumber, cellIndex) => {
           const isActive = hoveredNumber?.index === cellIndex;
           const isNeighbor = closestIndices.includes(cellIndex);
@@ -86,15 +77,14 @@ function App() {
               key={cellIndex}
               className="cell"
               style={{
-                ...cellStyle,
                 background: isActive
                   ? `linear-gradient(to right, green ${cellNumber}%, transparent ${cellNumber}%)`
                   : isNeighbor
                   ? 'lightgreen'
                   : '',
               }}
-              onMouseEnter={(e) => handleMouseEnter(e, cellNumber, cellIndex)}
-              onMouseLeave={(e) => handleMouseLeave(e, cellNumber, cellIndex)}
+              onMouseEnter={() => handleMouseEnter(cellNumber, cellIndex)}
+              onMouseLeave={handleMouseLeave}
             >
               {cellNumber}
             </div>

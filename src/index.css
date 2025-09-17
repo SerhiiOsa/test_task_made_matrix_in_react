@@ -14,15 +14,15 @@
 }
 
 .matrix {
-  margin-top: 20px;
-  display: flex;
-  flex-wrap: wrap;
-  width: 100%;
+  width: max-content;
+  display: grid;
+  grid-template-columns: repeat(var(--cols), 1fr);
+  gap: 2px;
 }
 
 .cell {
-  cursor: pointer;
-  box-sizing: border-box;
+  width: 20px;
+  height: 20px;
   border: 1px solid gray;
   display: flex;
   justify-content: center;
