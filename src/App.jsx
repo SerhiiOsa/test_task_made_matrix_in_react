@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 function App() {
   const [rows, setRows] = useState(10);
@@ -6,6 +6,7 @@ function App() {
   const [neighboringCells, setNeighboringCells] = useState(10);
   const [randomNumbers, setRandomNumbers] = useState([]);
   const [hoveredNumber, setHoveredNumber] = useState(null);
+  const closestCache = useRef({});
 
   useEffect(() => {
     setRandomNumbers(
@@ -14,6 +15,10 @@ function App() {
       })
     );
   }, [rows, cols]);
+
+  useEffect(() => {
+    closestCache.current = {};
+  }, [randomNumbers, neighboringCells]);
 
   const handleMouseOver = (e) => {
     const cell = e.target.closest('.cell');
@@ -29,22 +34,29 @@ function App() {
     setHoveredNumber(null);
   };
 
-  const getClosestIndices = (num) => {
+  const closestIndices = useMemo(() => {
+    if (!hoveredNumber) return [];
+
+    const { number, index } = hoveredNumber;
+
+    if (closestCache.current[index]) {
+      return closestCache.current[index];
+    }
     const diffs = [];
     randomNumbers.forEach((n, idx) => {
-      if (idx === hoveredNumber.index) {
+      if (idx === index) {
         return;
       }
-      diffs.push({ idx, diff: Math.abs(n - num) });
+      diffs.push({ idx, diff: Math.abs(n - number) });
     });
 
     diffs.sort((a, b) => a.diff - b.diff);
 
-    return diffs.slice(0, neighboringCells).map((item) => item.idx);
-  };
+    const closest = diffs.slice(0, neighboringCells).map((item) => item.idx);
+    closestCache.current[index] = closest;
 
-  const closestIndices =
-    hoveredNumber !== null ? getClosestIndices(hoveredNumber.number) : [];
+    return closest;
+  }, [hoveredNumber, randomNumbers, neighboringCells]);
 
   return (
     <div className="container">
